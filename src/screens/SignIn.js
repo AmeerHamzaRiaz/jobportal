@@ -1,14 +1,10 @@
-import React, { Component }  from "react";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import FormControl from "@material-ui/core/FormControl";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
+import React, { Component } from "react";
+import {Avatar,Button,CssBaseline,FormControl,Input,InputLabel,Paper} from "@material-ui/core";
 import LockIcon from "@material-ui/icons/LockOutlined";
-import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
-
+import fire from '../config/fire';
+import AlertDialog from '../components/AlertDialog';
+import { Link } from "react-router-dom";
 const styles = {
   main: {
     maxWidth: 400,
@@ -40,61 +36,106 @@ const styles = {
 class SignIn extends Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      email: '',
-      password: ''
-     };
+    this.state = {
+      email: "",
+      password: "",
+      showDialog: false,
+      dialogTitle: "",
+      dialogMessage: "",
+      error: false
+    };
   }
+
+  dialogHandler = () => {
+    this.setState({showDialog: false});
+  }
+
+
+  buttonPressed = (e) => {
+    console.log(this.state.email + " " + this.state.password);
+    e.preventDefault();
+    fire.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
+    .then((success) => {
+      console.log(success);
+    })
+    .catch((error) => {
+      var errorCode = error.code;
+      var errorMessage = error.message;
+      this.setState({error: true, showDialog: true, dialogTitle: errorCode, dialogMessage: errorMessage});
+      console.log(error);
+    });
+
+  };
 
   render() {
     return (
-    <main style={styles.main}>
-      <CssBaseline />
-      <Paper style={styles.paper} elevation={24}>
-        <Avatar style={styles.avatar}>
-          <LockIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Student Sign in
-        </Typography>
-        <form style={styles.form}>
-
-          <FormControl margin="normal" required fullWidth>
-            <InputLabel htmlFor="email">Email Address</InputLabel>
-            <Input id="email" name="email" autoComplete="email" autoFocus />
-          </FormControl>
-
-          <FormControl margin="normal" required fullWidth>
-            <InputLabel htmlFor="password">Password</InputLabel>
-            <Input
-              name="password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-            />
-          </FormControl>
-          
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            style={styles.submit}
-          >
-            Sign in
-          </Button>
-          <Typography
-            variant="subtitle1"
-            style={{ marginTop: 20 }}
-            gutterBottom
-          >
-            Don't have an account ? <a href="#">Register Now!</a>
+      <main style={styles.main}>
+        <CssBaseline />
+        <Paper style={styles.paper} elevation={24}>
+          <Avatar style={styles.avatar}>
+            <LockIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Student Sign in
           </Typography>
-        </form>
-      </Paper>
-    </main>
+
+          <form style={styles.form}>
+            <FormControl margin="normal" required fullWidth>
+              <InputLabel htmlFor="email">Email Address</InputLabel>
+              <Input
+                error={this.state.error}
+                id="email"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                onChange={e => this.setState({ email: e.target.value })}
+              />
+            </FormControl>
+
+            <FormControl margin="normal" required fullWidth>
+              <InputLabel htmlFor="password">Password</InputLabel>
+              <Input
+                error={this.state.error}
+                name="password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                onChange={e =>this.setState({ password: e.target.value })}
+              />
+            </FormControl>
+
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              style={styles.submit}
+              onClick={this.buttonPressed}
+            >
+              Sign in
+            </Button>
+            <div style={{ textAlign: "center" }}>
+            <Typography
+              variant="subtitle1"
+              style={{ marginTop: 20 }}
+              gutterBottom
+            >
+              Don't have an account ? {" "}
+              <Link style={{textDecoration: 'none'}} to="/registerStudent" >Register Now!</Link>
+            </Typography>
+            </div>
+          </form>
+        </Paper>
+
+        <AlertDialog
+          action={this.dialogHandler}
+          title={this.state.dialogTitle}
+          message={this.state.dialogMessage}
+          open={this.state.showDialog}
+        />
+
+      </main>
     );
   }
-};
+}
 
 export default SignIn;
