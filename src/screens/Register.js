@@ -6,10 +6,12 @@ import {
   FormControl,
   Input,
   InputLabel,
-  Paper
+  Paper,
+  Typography,
+  CircularProgress
+
 } from "@material-ui/core";
-import LockIcon from "@material-ui/icons/LockOutlined";
-import Typography from "@material-ui/core/Typography";
+import PersonIcon from "@material-ui/icons/Person";
 import Background from "../images/bg.jpg";
 import { Link } from "react-router-dom";
 import fire from "../config/fire";
@@ -30,7 +32,9 @@ const styles = {
     position: "relative"
   },
   mainForm: {
-    maxWidth: 400,
+    paddingTop: 20,
+    paddingBottom: 20,
+    maxWidth: 450,
     width: "auto",
     display: "block", // Fix IE 11 issue.
     marginLeft: 24,
@@ -52,6 +56,13 @@ const styles = {
   },
   submit: {
     marginTop: 24
+  },
+  submitLoader: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12
   }
 };
 
@@ -63,10 +74,14 @@ class Register extends Component {
       email: "",
       mobile: "",
       password: "",
+      address: "",
+      degree: "",
+      cgpa: "",
       showDialog: false,
       dialogTitle: "",
       dialogMessage: "",
-      error: false
+      error: false,
+      loading: false
     };
   }
   
@@ -76,18 +91,33 @@ class Register extends Component {
 
 
   buttonPressed = e => {
-    console.log(this.state.email +" " +this.state.password +" " +this.state.name + " " +this.state.mobile);
+    this.setState({loading : true});
+    const {name, email, mobile, password, address, degree, cgpa} = this.state;
     e.preventDefault();
+
     fire
       .auth()
-      .createUserWithEmailAndPassword(this.state.email, this.state.password)
+      .createUserWithEmailAndPassword(email, password)
       .then(success => {
-        this.setState({showDialog: true, dialogTitle: "Registered Successfully", dialogMessage: "Click on the 'Sign In' to Login"});
+        let uid = fire.auth().currentUser.uid;
+        let database = fire.database();
+        database.ref('users/' + uid).set({
+          name: name,
+          email: email,
+          password: password,
+          mobile: mobile,
+          address: address,
+          degree: degree,
+          cgpa: cgpa,
+          jobsApplied: ''
+        });
+        this.setState({showDialog: true, dialogTitle: "Registered Successfully", dialogMessage: "Click on the 'Sign In' to Login", loading:false });
+     
       })
       .catch(error => {
         var errorCode = error.code;
         var errorMessage = error.message;
-        this.setState({ showDialog: true, dialogTitle: errorCode, dialogMessage: errorMessage});
+        this.setState({ loading: false, showDialog: true, dialogTitle: errorCode, dialogMessage: errorMessage});
         console.log(error);
       });
   };
@@ -99,7 +129,7 @@ class Register extends Component {
           <CssBaseline />
           <Paper style={styles.paper} elevation={24}>
             <Avatar style={styles.avatar}>
-              <LockIcon />
+              <PersonIcon />
             </Avatar>
             <Typography component="h1" variant="h5">
               Register Student Account
@@ -122,6 +152,7 @@ class Register extends Component {
                 <Input
                   id="number"
                   name="number"
+                  type="tel"
                   onChange={e => this.setState({ mobile: e.target.value })}
                 />
               </FormControl>
@@ -149,14 +180,52 @@ class Register extends Component {
                 />
               </FormControl>
 
+              {/* Degree */}
+              <FormControl margin="normal" required fullWidth>
+                <InputLabel htmlFor="degree">Degree</InputLabel>
+                <Input
+                  name="degree"
+                  id="degree"
+                  onChange={e => this.setState({ degree: e.target.value })}
+                />
+              </FormControl>
+
+              {/* CGPA */}
+              <FormControl margin="normal" required fullWidth>
+                <InputLabel htmlFor="cgpa">CGPA</InputLabel>
+                <Input
+                  name="cgpa"
+                  id="cgpa"
+                  onChange={e => this.setState({ cgpa: e.target.value })}
+                />
+              </FormControl>
+
+              {/* Address */}
+              <FormControl margin="normal" required fullWidth>
+                <InputLabel htmlFor="">Address</InputLabel>
+                <Input
+                  name="address"
+                  id="address"
+                  onChange={e => this.setState({ address: e.target.value })}
+                />
+              </FormControl>
+
               <Button
                 fullWidth
                 variant="contained"
                 color="primary"
                 style={styles.submit}
                 onClick={this.buttonPressed}
+                disabled={this.state.loading}
               >
                 Register
+                {this.state.loading && (
+                <CircularProgress
+                  style={styles.submitLoader}
+                  color="secondary"
+                  size={25}
+                />
+              )}
               </Button>
               <div style={{ textAlign: "center" }}>
                 <Typography

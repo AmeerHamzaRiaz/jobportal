@@ -7,12 +7,10 @@ import Typography from '@material-ui/core/Typography';
 import Badge from '@material-ui/core/Badge';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
-import { fade } from '@material-ui/core/styles/colorManipulator';
 import { withStyles } from '@material-ui/core/styles';
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import MailIcon from '@material-ui/icons/Mail';
-import NotificationsIcon from '@material-ui/icons/Notifications';
+import WorkIcon from '@material-ui/icons/Work';
 import MoreIcon from '@material-ui/icons/MoreVert';
 
 import fire from '../config/fire';
@@ -31,45 +29,6 @@ const styles = theme => ({
     display: 'none',
     [theme.breakpoints.up('sm')]: {
       display: 'block',
-    },
-  },
-  search: {
-    position: 'relative',
-    borderRadius: theme.shape.borderRadius,
-    backgroundColor: fade(theme.palette.common.white, 0.15),
-    '&:hover': {
-      backgroundColor: fade(theme.palette.common.white, 0.25),
-    },
-    marginRight: theme.spacing.unit * 2,
-    marginLeft: 0,
-    width: '100%',
-    [theme.breakpoints.up('sm')]: {
-      marginLeft: theme.spacing.unit * 3,
-      width: 'auto',
-    },
-  },
-  searchIcon: {
-    width: theme.spacing.unit * 9,
-    height: '100%',
-    position: 'absolute',
-    pointerEvents: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  inputRoot: {
-    color: 'inherit',
-    width: '100%',
-  },
-  inputInput: {
-    paddingTop: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
-    paddingBottom: theme.spacing.unit,
-    paddingLeft: theme.spacing.unit * 10,
-    transition: theme.transitions.create('width'),
-    width: '100%',
-    [theme.breakpoints.up('md')]: {
-      width: 200,
     },
   },
   sectionDesktop: {
@@ -96,6 +55,24 @@ class TopAppBar extends Component {
     this.setState({ anchorEl: event.currentTarget });
   };
 
+  handleSignOutPressed = () => {
+    this.setState({ anchorEl: null, mobileMoreAnchorEl: null});
+    console.log('Sign Out Pressed')
+    fire.auth().signOut()
+    .then((success) => {
+      console.log(success);
+    })
+    .catch((error) => {
+      console.log(error);
+    }); 
+  }
+
+  handleEditProfile = () => {
+    this.setState({ anchorEl: null, mobileMoreAnchorEl: null});
+    console.log('Navigate to Profile Update Page')
+  }
+
+
   handleMenuClose = () => {
     this.setState({ anchorEl: null });
     this.handleMobileMenuClose();
@@ -109,6 +86,7 @@ class TopAppBar extends Component {
     this.setState({ mobileMoreAnchorEl: null });
   };
 
+  //logsout the user
   logout = () =>{
     fire.auth().signOut()
     .then((success) => {
@@ -133,8 +111,8 @@ class TopAppBar extends Component {
         open={isMenuOpen}
         onClose={this.handleMenuClose}
       >
-        <MenuItem onClick={this.handleMenuClose}>Profile</MenuItem>
-        <MenuItem onClick={this.handleMenuClose}>Sign Out</MenuItem>
+        {/* <MenuItem onClick={this.handleEditProfile}>Edit Profile</MenuItem> */}
+        <MenuItem onClick={this.handleSignOutPressed}>Sign Out</MenuItem>
       </Menu>
     );
 
@@ -148,16 +126,8 @@ class TopAppBar extends Component {
       >
         <MenuItem>
           <IconButton color="inherit">
-            <Badge badgeContent={4} color="secondary">
-              <MailIcon />
-            </Badge>
-          </IconButton>
-          <p>Messages</p>
-        </MenuItem>
-        <MenuItem>
-          <IconButton color="inherit">
             <Badge badgeContent={11} color="secondary">
-              <NotificationsIcon />
+              <WorkIcon />
             </Badge>
           </IconButton>
           <p>Notifications</p>
@@ -179,18 +149,13 @@ class TopAppBar extends Component {
               <MenuIcon />
             </IconButton>
             <Typography className={classes.title} variant="h6" color="inherit" noWrap>
-              Material-UI
+              Job Portal
             </Typography>
             <div className={classes.grow} />
             <div className={classes.sectionDesktop}>
               <IconButton color="inherit">
-                <Badge badgeContent={4} color="secondary">
-                  <MailIcon />
-                </Badge>
-              </IconButton>
-              <IconButton color="inherit">
                 <Badge badgeContent={17} color="secondary">
-                  <NotificationsIcon />
+                  <WorkIcon />
                 </Badge>
               </IconButton>
               <IconButton
@@ -200,11 +165,6 @@ class TopAppBar extends Component {
                 color="inherit"
               >
                 <AccountCircle />
-              </IconButton>
-            </div>
-            <div className={classes.sectionMobile}>
-              <IconButton aria-haspopup="true" onClick={this.handleMobileMenuOpen} color="inherit">
-                <MoreIcon />
               </IconButton>
             </div>
           </Toolbar>

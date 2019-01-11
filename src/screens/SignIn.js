@@ -1,9 +1,18 @@
 import React, { Component } from "react";
-import {Avatar,Button,CssBaseline,FormControl,Input,InputLabel,Paper} from "@material-ui/core";
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  FormControl,
+  Input,
+  InputLabel,
+  Paper,
+  CircularProgress
+} from "@material-ui/core";
 import LockIcon from "@material-ui/icons/LockOutlined";
 import Typography from "@material-ui/core/Typography";
-import fire from '../config/fire';
-import AlertDialog from '../components/AlertDialog';
+import fire from "../config/fire";
+import AlertDialog from "../components/AlertDialog";
 import { Link } from "react-router-dom";
 const styles = {
   main: {
@@ -30,6 +39,13 @@ const styles = {
   },
   submit: {
     marginTop: 24
+  },
+  submitLoader: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    marginTop: -12,
+    marginLeft: -12
   }
 };
 
@@ -42,29 +58,37 @@ class SignIn extends Component {
       showDialog: false,
       dialogTitle: "",
       dialogMessage: "",
-      error: false
+      error: false,
+      loading: false
     };
   }
 
   dialogHandler = () => {
-    this.setState({showDialog: false});
-  }
+    this.setState({ showDialog: false });
+  };
 
-
-  buttonPressed = (e) => {
+  buttonPressed = e => {
+    this.setState({ loading: true });
     console.log(this.state.email + " " + this.state.password);
     e.preventDefault();
-    fire.auth().signInWithEmailAndPassword(this.state.email, this.state.password)
-    .then((success) => {
-      console.log(success);
-    })
-    .catch((error) => {
-      var errorCode = error.code;
-      var errorMessage = error.message;
-      this.setState({error: true, showDialog: true, dialogTitle: errorCode, dialogMessage: errorMessage});
-      console.log(error);
-    });
-
+    fire
+      .auth()
+      .signInWithEmailAndPassword(this.state.email, this.state.password)
+      .then(success => {
+        console.log(success);
+      })
+      .catch(error => {
+        this.setState({ loading: false });
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        this.setState({
+          error: true,
+          showDialog: true,
+          dialogTitle: errorCode,
+          dialogMessage: errorMessage
+        });
+        console.log(error);
+      });
   };
 
   render() {
@@ -100,7 +124,7 @@ class SignIn extends Component {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                onChange={e =>this.setState({ password: e.target.value })}
+                onChange={e => this.setState({ password: e.target.value })}
               />
             </FormControl>
 
@@ -110,18 +134,29 @@ class SignIn extends Component {
               color="primary"
               style={styles.submit}
               onClick={this.buttonPressed}
+              disabled={this.state.loading}
             >
               Sign in
+              {this.state.loading && (
+                <CircularProgress
+                  style={styles.submitLoader}
+                  color="secondary"
+                  size={25}
+                />
+              )}
             </Button>
+
             <div style={{ textAlign: "center" }}>
-            <Typography
-              variant="subtitle1"
-              style={{ marginTop: 20 }}
-              gutterBottom
-            >
-              Don't have an account ? {" "}
-              <Link style={{textDecoration: 'none'}} to="/registerStudent" >Register Now!</Link>
-            </Typography>
+              <Typography
+                variant="subtitle1"
+                style={{ marginTop: 20 }}
+                gutterBottom
+              >
+                Don't have an account ?{" "}
+                <Link style={{ textDecoration: "none" }} to="/registerStudent">
+                  Register Now!
+                </Link>
+              </Typography>
             </div>
           </form>
         </Paper>
@@ -132,7 +167,6 @@ class SignIn extends Component {
           message={this.state.dialogMessage}
           open={this.state.showDialog}
         />
-
       </main>
     );
   }
