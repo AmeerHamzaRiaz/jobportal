@@ -65,7 +65,6 @@ class App extends Component {
   render() {
   
   return (
-    // <div>{this.renderContent()}</div>
     <Switch>
       <Route exact path="/" component={this.renderContent} />
       <Route exact path="/registerStudent" component={Register} />
